@@ -6,7 +6,9 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
- 
+ using System.Data.SqlClient;
+using Dapper;
+
 namespace BlogDataLibrary.Database
 {
     public class SqlDataAccess : ISqlDataAccess
@@ -18,7 +20,10 @@ namespace BlogDataLibrary.Database
             _config = config;
         }
 
-        public List<T> LoadData<T, U>(string sqlStatement, U parameters, string connectionStringName, bool isStoredProcedure)
+        public List<T> LoadData<T, U>(string sqlStatement,
+                                       U parameters,
+                                       string connectionStringName,
+                                       bool isStoredProcedure)
         {
             CommandType commandType = CommandType.Text;
             string connectionString = _config.GetConnectionString(connectionStringName);
@@ -30,7 +35,6 @@ namespace BlogDataLibrary.Database
 
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-
                 List<T> rows = connection.Query<T>(sqlStatement, parameters, commandType: commandType).ToList();
                 return rows;
             }
