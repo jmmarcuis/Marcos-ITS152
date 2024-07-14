@@ -13,6 +13,8 @@ namespace BlogAPI
 {
     public class Program
     {
+
+
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,17 @@ namespace BlogAPI
             builder.Services.AddTransient<ISqlData, SqlData>();
             builder.Services.AddTransient<ISqlDataAccess, SqlDataAccess>();
             builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowReactApp",
+                    builder => builder
+                        .WithOrigins("http://localhost:5046")
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
+
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
@@ -39,6 +52,8 @@ namespace BlogAPI
                 };
             });
 
+
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -50,7 +65,9 @@ namespace BlogAPI
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseCors("AllowAllOrigins");
+            app.UseCors("AllowSpecificOrigins");
+            app.UseRouting(); app.UseCors("AllowReactApp");
             app.MapControllers();
 
             app.Run();
