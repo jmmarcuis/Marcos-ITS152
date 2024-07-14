@@ -26,6 +26,15 @@ namespace BlogDataLibrary.Data
             return result;
         }
 
+        public UserModel GetUserById(int id)
+        {
+            return _db.LoadData<UserModel, dynamic>(
+                "dbo.spUsers_GetById",
+                new { Id = id },
+                connectionStringName,
+                true).FirstOrDefault();
+        }
+
         public void Register(string username, string firstName, string lastName, string password)
         {
             _db.SaveData<dynamic>(

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -36,38 +37,65 @@ namespace BlogAPI.Controllers
                 _config["Jwt:Issuer"],
                 _config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddMinutes(15),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config["Jwt:ExpireMinutes"])), // Adjust expiry time as needed
                 signingCredentials: credentials
             );
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         [AllowAnonymous]
-        [HttpPost]
-        [Route("login")]
-        public ActionResult Login([FromBody] UserLogin login)
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserLogin login)
         {
             UserModel user = _db.Authenticate(login.UserName, login.Password);
 
             if (user != null)
             {
-                var token = GenerateToken(user);
-                return Ok(token);
+                var tokenString = GenerateToken(user);
+                return Ok(new { Token = tokenString });
             }
 
-            return NotFound("User Not Found");
+            return Unauthorized(new { Error = "Invalid credentials" });
         }
-
 
         [AllowAnonymous]
-        [HttpPost]
-        [Route("register")]
-        public ActionResult Resgister([FromBody] UserModel user)
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] UserModel user)
         {
-            _db.Register(user.UserName, user.FirstName, user.LastName, user.Password);
-            return Ok("User Registered");
+            try
+            {
+                _db.Register(user.UserName, user.FirstName, user.LastName, user.Password);
+                return Ok(new { Message = "User registered successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
 
+        [Authorize]
+        [HttpGet("user-info")]
+        public IActionResult GetUserInfo()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int id))
+            {
+                return Unauthorized();
+            }
 
+            UserModel user = _db.GetUserById(id);
+            if (user == null)
+            {
+                return NotFound(new { Error = "User not found" });
+            }
+
+            return Ok(new
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                FirstName = user.FirstName,
+                LastName = user.LastName
+            });
+        }
     }
 }

@@ -68,6 +68,7 @@
     <Build Include="Stored Procedures\spPosts_Insert.sql" />
     <Build Include="Stored Procedures\spPosts_List.sql" />
     <Build Include="Stored Procedures\spPosts_Details.sql" />
+    <Build Include="Stored Procedures\spUsers_GetByID.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MarcosBlogDB.publish.xml" />

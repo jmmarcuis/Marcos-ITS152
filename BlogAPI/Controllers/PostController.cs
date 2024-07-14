@@ -34,7 +34,7 @@ namespace BlogAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        [Route("api/[controller]/{id}")]
+        [Route("postdetails/{id}")]
 
         public ActionResult ShowPostDetails(int id)
         {

@@ -1,87 +1,49 @@
-// src/components/AuthenticatePage.tsx
 import React, { useState } from 'react';
-import { login, register } from '../services/AuthenticationService';
+import { login } from '../services/AuthenticationService';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-const AuthenticatePage: React.FC = () => {
+const LoginPage: React.FC = () => {
     const [userName, setUserName] = useState('');
     const [password, setPassword] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
+    const navigate = useNavigate(); // Initialize useNavigate hook
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await login(userName, password);
+            const data = await login(userName, password);
             alert('Login successful');
+            console.log('Token:', data.token);
+            navigate('/listpost'); 
         } catch (error) {
             alert('Login failed');
         }
     };
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            await register(userName, firstName, lastName, password);
-            alert('Registration successful');
-        } catch (error) {
-            alert('Registration failed');
-        }
-    };
-
     return (
-        <div>
-            {isLogin ? (
-                <form onSubmit={handleLogin}>
-                    <h2>Login</h2>
-                    <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Username"
-                    />
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                    />
-                    <button type="submit">Login</button>
-                    <button type="button" onClick={() => setIsLogin(false)}>Switch to Register</button>
-                </form>
-            ) : (
-                <form onSubmit={handleRegister}>
-                    <h2>Register</h2>
-                    <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Username"
-                    />
-                    <input
-                        type="text"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="First Name"
-                    />
-                    <input
-                        type="text"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Last Name"
-                    />
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Password"
-                    />
-                    <button type="submit">Register</button>
-                    <button type="button" onClick={() => setIsLogin(true)}>Switch to Login</button>
-                </form>
-            )}
+        <div className="auth-container">
+            <form onSubmit={handleLogin} className="auth-form">
+                <h2 className="auth-title">Login</h2>
+                <input
+                    className="auth-input"
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Username"
+                />
+                <input
+                    className="auth-input"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                />
+                <button className="auth-button" type="submit">Login</button>
+                <div className="auth-switch">
+                    <a href="/register">Switch to Register</a>
+                </div>
+            </form>
         </div>
     );
 };
 
-export default AuthenticatePage;
+export default LoginPage;
